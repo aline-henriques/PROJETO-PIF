@@ -19,9 +19,9 @@ Descrição do jogo, regras e interação.
 ### 👥 | Equipe
 
 - Aline de Albuquerque Henriques - [@aline-henriques](https://github.com/aline-henriques)
-- Allan Ronald - @
-- Bruno Felipe de Castilhos Gomes Rego - [@bruno-cod](https://github.com/bruno-cod)
-- Thyalles Araújo Campos - [@thyalles](https://github.com/thyalles)
+- Allan Ronald - [@AllanVasconceL0s](https://github.com/allanvasconcel0s)
+- Bruno Felipe de Castilhos Gomes Rego - [@Bruno-cod](https://github.com/bruno-cod)
+- Thyalles Araújo Campos - [@Thyalles](https://github.com/thyalles)
 
 *** 
 
