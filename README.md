@@ -10,6 +10,7 @@ Desenvolvido para a disciplina de **Programação Imperativa e Funcional 2025.1*
 3. [Arquitetura do Código](#-arquitetura-do-código)  
 4. [Como Jogar](#-como-jogar)  
 5. [Equipe](#-equipe)
+6. [Licença](#licenca)
 
 ***
 
@@ -28,8 +29,8 @@ Este projeto implementa um jogo de aventura interativo no terminal, escrito em l
 
 > Mecânicas de movimentação e combate com tiros  
 
-***
 
+***
 
 ### 🎮 | Características do Jogo  
 
@@ -132,3 +133,10 @@ Menu Inicial → Novo Jogo → Fases 1 a 4 (obstáculos) → Fase 5 (chefão) �
 - Allan Ronald - @AllanVasconceL0s
 - Bruno Felipe de Castilhos Gomes Rego - @Bruno-cod
 - Thyalles Araújo Campos - @Thyalles
+
+***
+
+### ©️ | Licença MIT 
+
+Este projeto é de uso educacional e não possui fins comerciais.
+Todos os direitos reservados aos autores e à CESAR School.
