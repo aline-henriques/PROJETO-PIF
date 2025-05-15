@@ -6,9 +6,9 @@
 #include <string.h>
 
 
-#include "screen.h"
-#include "keyboard.h"
-#include "timer.h"
+#include "../include/screen.h"
+#include "../include/keyboard.h"
+#include "../include/timer.h"
 
 #define MAX_RECORDS 1000
 
@@ -725,8 +725,8 @@ int main()
     int tempoinicial = 0;
     int tempoTiro = 0;
     int intervalo = 30;
-    int faseAtual = 5;
-    int novaFase = 5;
+    int faseAtual = 1;
+    int novaFase = 1;
     int contadorMovimentoBoss = 0;
     int intervaloMovimentoBoss = 5;
     int bossIniciado = 0;
@@ -814,13 +814,13 @@ int main()
                             printPersonagem(MAXX*0.5, MAXY*0.5);
                             timerInit(30);
                             break;
-                        case 1: // Pontuação
-                            screenClear(); // Limpa a tela
-                            ler_pontuacoes(); // Mostra as pontuações
+                        case 1:
+                            screenClear();
+                            ler_pontuacoes();
                             printf("\nPressione qualquer tecla para voltar...");
-                            while (!keyhit()); // Espera qualquer tecla
-                            readch(); // Limpa o buffer
-                            screenClear(); // Limpa novamente antes de mostrar o menu
+                            while (!keyhit());
+                            readch(); 
+                            screenClear();
                             break;
                         case 2:
                             // Configurações
@@ -1029,9 +1029,9 @@ int main()
                             }
                             readch(); // Limpa o buffer do teclado
                             
-                            printMensagemBoss(APAGAR); // Apaga a mensagem
-                            bossIniciado = 1; // Marca que o boss começou
-                            timerUpdateTimer(50); // Reinicia o timer para a fase do boss
+                            printMensagemBoss(APAGAR);
+                            bossIniciado = 1;
+                            timerUpdateTimer(50);
                         }
                         contadorMovimentoBoss++;
                         
