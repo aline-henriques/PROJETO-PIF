@@ -117,11 +117,17 @@ Menu Inicial → Novo Jogo → Fases 1 a 4 (obstáculos) → Fase 5 (chefão) �
 
 1. Compile o código:
    ```bash
-   gcc game.c -o game
+   gcc ./src/*.c -I ./include/
 
 2. Execute o jogo:
 
    ```/game
+   gcc ./src/*.c -I ./include/ -o game
+
+3. Execute o jogo:
+
+   ```/game
+   ./game.exe
 
 > Certifique-se de que todas as bibliotecas customizadas estejam no mesmo diretório do projeto.
 
