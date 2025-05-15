@@ -5,7 +5,7 @@
  * Based on "From C to C++ course - 2002"
 */
 
-#include "screen.h"
+#include "../include/screen.h"
 
 void screenDrawBorders() 
 {

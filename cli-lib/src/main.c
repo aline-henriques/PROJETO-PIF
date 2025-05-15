@@ -13,19 +13,22 @@
 #define MAX_RECORDS 1000
 
 int pontuacao = 0;
-int x_menuInicial = MAXX*0.05, y_menuInicial = MAXY*0.5;
-int x_setaMenu = (MAXX*0.05)-2, y_setaMenu = MAXY*0.5;
-int x_perso = MAXX*0.5, y_perso = MAXY*0.5;
+int x_menuInicial = MAXX * 0.05, y_menuInicial = MAXY * 0.5;
+int x_setaMenu = (MAXX * 0.05)-2, y_setaMenu = MAXY * 0.5;
+int x_perso = MAXX * 0.5, y_perso = MAXY * 0.5;
 int x_boss = MAXX + 1, y_boss = MAXY * 0.3;
 int x_pont = 0,y_pont = 0;
 int x_gameOver = MAXX * 0.60, y_gameOver = MAXY * 0.5;
+int x_config = (MAXX * 0.5)-2, y_config = (MAXY * 0.5)-2;
+
 
 typedef enum
 {
     VERMELHO,
     VERDE,
     AZUL,
-    AMARELO
+    AMARELO,
+    COR_TOTAL
 } Cor;
 
 typedef struct
@@ -59,6 +62,7 @@ typedef enum
     DESENHAR
 } TipoAcao;
 
+//possiveis melhorias
 typedef enum
 {
     HORIZONTAL,
@@ -425,33 +429,34 @@ void printPontuacao(int x_pont, int y_pont, TipoAcao acao)
     }
 }
 
-void printPersonagem(int nextX, int nextY)
+void printPersonagem(int nextX, int nextY, TipoAcao acao, Avatar a1)
 {
-    Avatar a1;
-    a1.cor=VERMELHO;
-    a1.personagem=personagens[0];
 
-    screenSetColor(RED, DARKGRAY);
+    screenSetColor(a1.cor, DARKGRAY);
 
-    for (int i = 0; i < 3; i++)
+    if (acao == DESENHAR)
     {
-        screenGotoxy(x_perso, y_perso+i);
-        printf("   ");
+        x_perso = nextX;
+        y_perso = nextY;
+
+        for (int i = 0; i < 3; i++)
+        {
+            screenGotoxy(x_perso, y_perso+i);
+            printf("%s",a1.personagem.linhas[i]);
+        }
+    }else{
+        for (int i = 0; i < 3; i++)
+        {
+            screenGotoxy(x_perso, y_perso+i);
+            printf("   ");
+        }
     }
-
-    x_perso = nextX;
-    y_perso = nextY;
-
-    for (int i = 0; i < 3; i++)
-    {
-        screenGotoxy(x_perso, y_perso+i);
-        printf("%s",a1.personagem.linhas[i]);
-    }
-
 }
 
 int verificarColisaoFases(Obstaculos* obs, int maxObj)
 {
+    if (!obs) return 0;
+
     for (int i = 0; i < maxObj; i++) 
     {
         if (obs[i].tamanho > 0) 
@@ -703,6 +708,46 @@ void ler_pontuacoes() {
     fclose(arquivo);
 }
 
+void printConfig(TipoAcao acao, Avatar a1)
+{
+    const char* config_desenhado[] = {
+        "  ↑  ",
+        "     ",
+        "←   →",
+        "     ",
+        "  ↓  "
+  
+
+       
+    };
+
+    const char* config_apagado[] = {
+        "     ",
+        "     ",
+        "     ",
+        "     ",
+        "     "
+    };
+
+    const char* const* config = (acao == DESENHAR) ? config_desenhado : config_apagado;
+
+    screenSetColor(WHITE, DARKGRAY);
+
+    for (int i = 0; i < 5; i++)
+    {
+        screenGotoxy(x_config, y_config + i);
+
+        for (int i = 0; i < 5; i++)
+        {
+            screenGotoxy(x_config, y_config + i);
+            printf("%s", config[i]);
+        } 
+    }
+
+    printPersonagem(x_config + 1, y_config + 1, acao, a1);
+    
+}
+
 int main() 
 {
     static int ch = 0;
@@ -711,8 +756,20 @@ int main()
     int maxTiros = 500;
     int maxTirosBoss = 500;
     Obstaculos* obs = malloc(sizeof(Obstaculos) * maxObj);
+    if (!obs) 
+    {
+        printf("Erro ao alocar memória para obstáculos!\n");
+    }
     Tiro* tiroPersonagem = malloc(sizeof(Tiro) * maxTiros);
+    if (!tiroPersonagem) 
+    {
+        printf("Erro ao alocar memória para Tiros do Personagem!\n");
+    }
     Tiro* tiroBoss = malloc(sizeof(Tiro) * maxTirosBoss);
+    if (!tiroBoss) 
+    {
+        printf("Erro ao alocar memória para Tiros do BOSS!\n");
+    }
     int obstaculoAtual = 0;
     int tiroAtual = 0;
     int tiroBossAtual = 0;
@@ -720,7 +777,6 @@ int main()
     int tempoEntreTiros = 10;
     int tempoEntreTirosBoss = 20;
     int contadorObstaculos = 0;
-    int contadorTiros = 0;
     int contadorTirosBoss = 0;
     int tempoinicial = 0;
     int tempoTiro = 0;
@@ -728,10 +784,12 @@ int main()
     int faseAtual = 1;
     int novaFase = 1;
     int contadorMovimentoBoss = 0;
-    int intervaloMovimentoBoss = 5;
     int bossIniciado = 0;
     int bossPronto = 0;
     int bossVida = 10;
+    Avatar avatar1 = {VERMELHO, personagens[0]};;
+    int navePerso = 0;
+
 
     for (int i = 0; i < maxObj; i++)
     {
@@ -802,16 +860,51 @@ int main()
                     switch (opcaoSelecionada)
                     {
                         case 0:
+                            timerDestroy();
                             bossIniciado = 0;
                             bossVida = 10;
+                            pontuacao = 0;
+                            faseAtual = 1;
+                            novaFase = 1;
+                            obstaculoAtual = 0;
+                            contadorObstaculos = 0;
+                            tempoEntreObstaculos = 60;
+                            tempoinicial = 0;
+                            tempoTiro = 0;
+                            contadorTirosBoss = 0;
+                            tiroAtual = 0;
+                            tiroBossAtual = 0;
+                            contadorMovimentoBoss = 0;
+
+                            x_perso = MAXX * 0.5;
+                            y_perso = MAXY * 0.5;
+                            x_boss = MAXX + 1;
+                            
+                            for (int i = 0; i < maxObj; i++) 
+                            {
+                                printObj(obs[i], APAGAR);
+                                obs[i].tamanho = 0;
+                            }
+                            
+                            for (int i = 0; i < maxTiros; i++) 
+                            {
+                                printTiros(tiroPersonagem[i], APAGAR);
+                                tiroPersonagem[i].ativo = 0;
+                            }
+                            
+                            for (int i = 0; i < maxTirosBoss; i++) 
+                            {
+                                printTirosBoss(tiroBoss[i], APAGAR);
+                                tiroBoss[i].ativo = 0;
+                            }
+                            
                             printGameOver(APAGAR);
                             printPontuacao(x_gameOver, y_gameOver + 1, APAGAR);
                             printMenuInicial(APAGAR);
                             printSetaMenu(y_setaMenu, APAGAR);
-                            limparTiros(tiroPersonagem, maxTiros);
-                            limparTiros(tiroBoss, maxTirosBoss);
+                            
                             jogoIniciado = 1;
-                            printPersonagem(MAXX*0.5, MAXY*0.5);
+                            printPersonagem(MAXX*0.5, MAXY*0.5, DESENHAR, avatar1);
                             timerInit(30);
                             break;
                         case 1:
@@ -823,7 +916,69 @@ int main()
                             screenClear();
                             break;
                         case 2:
-                            // Configurações
+                            screenClear();
+                            printConfig(DESENHAR, avatar1);
+                            printf("\nPressione qualquer tecla para voltar...");
+                            int total_personagens = sizeof(personagens) / sizeof(personagens[0]);
+                            while (1) 
+                            {
+                                if (keyhit()) 
+                                {
+                                    int ch = readch();
+                                    if (ch == 0 || ch == 224) 
+                                    {
+                                        ch = readch();
+                                    }
+                                    switch (ch){
+
+                                        //cima
+                                        case 72:
+                                            printPersonagem(x_config + 1, y_config + 1, APAGAR, avatar1);
+                                            avatar1.cor = (avatar1.cor + 1) % COR_TOTAL;
+                                            printPersonagem(x_config + 1, y_config + 1, DESENHAR, avatar1);
+                                            break;
+
+                                        //esquerda
+                                        case 75:
+                                            printPersonagem(x_config + 1, y_config + 1, APAGAR, avatar1);
+                                            navePerso--;
+                                            avatar1.personagem = personagens[navePerso];
+                                            if (navePerso < 0)
+                                            {
+                                                navePerso = total_personagens-1;
+                                                avatar1.personagem = personagens[navePerso];
+                                            }
+                                            printPersonagem(x_config + 1, y_config + 1, DESENHAR, avatar1);
+                                            break;
+
+                                        //baixo
+                                        case 80:
+                                            printPersonagem(x_config + 1, y_config + 1, APAGAR, avatar1);
+                                            avatar1.cor = (avatar1.cor - 1 + COR_TOTAL) % COR_TOTAL;
+                                            printPersonagem(x_config + 1, y_config + 1, DESENHAR, avatar1);                                          
+                                            break;
+
+                                        //direita
+                                        case 77:
+                                            printPersonagem(x_config + 1, y_config + 1, APAGAR, avatar1);
+                                            navePerso++;
+                                            avatar1.personagem = personagens[navePerso];
+                                            if (navePerso >= total_personagens)
+                                            {
+                                                navePerso = 0;
+                                                avatar1.personagem = personagens[navePerso];
+                                            }
+                                            printPersonagem(x_config + 1, y_config + 1, DESENHAR, avatar1);
+                                            break;
+                                    }
+                                    if (!(ch == 72 || ch == 75 || ch == 80 || ch == 77))
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            readch();
+                            screenClear();
                             break;
                         case 3:
                             keyboardDestroy();
@@ -854,7 +1009,8 @@ int main()
                     case 72:
                         if(y_perso - 1> MINY)
                         {
-                            printPersonagem(x_perso, y_perso - 1);
+                            printPersonagem(x_perso, y_perso, APAGAR, avatar1);
+                            printPersonagem(x_perso, y_perso - 1, DESENHAR, avatar1);
                         }
                         break;
 
@@ -862,7 +1018,8 @@ int main()
                     case 75:
                         if(x_perso - 1 >MINX)
                         {
-                            printPersonagem(x_perso - 2, y_perso);
+                            printPersonagem(x_perso, y_perso, APAGAR, avatar1);
+                            printPersonagem(x_perso - 2, y_perso, DESENHAR, avatar1);
                         }
                         break;
 
@@ -870,7 +1027,8 @@ int main()
                     case 80:
                         if(y_perso + 3 < MAXY)
                         {
-                            printPersonagem(x_perso, y_perso + 1);
+                            printPersonagem(x_perso, y_perso, APAGAR, avatar1);
+                            printPersonagem(x_perso, y_perso + 1, DESENHAR, avatar1);
                         }
                         break;
 
@@ -878,7 +1036,8 @@ int main()
                     case 77:
                         if(x_perso + 4 < MAXX)
                         {
-                            printPersonagem(x_perso + 2, y_perso);
+                            printPersonagem(x_perso, y_perso, APAGAR, avatar1);
+                            printPersonagem(x_perso + 2, y_perso, DESENHAR, avatar1);
                         }
                         break;
                     case 32:
@@ -1016,9 +1175,7 @@ int main()
                         break;
                     //FINALBOSS
                     case 5:
-                        free(obs);
-                        printKey(ch);
-                        
+                        printKey(ch);                        
                         if (!bossIniciado) {
                             printMensagemBoss(DESENHAR);
                             screenUpdate();
@@ -1083,6 +1240,8 @@ int main()
                             salvar_pontuacao(pontuacao);
                             printPontuacao(x_gameOver, y_gameOver + 1, DESENHAR);
                             jogoIniciado = 0;
+                            faseAtual = 1;
+                            novaFase = 1;
                         }
                          
                         
@@ -1091,7 +1250,8 @@ int main()
                         break;
                 }
                 
-                printPersonagem(x_perso, y_perso);
+                printPersonagem(x_perso, y_perso, APAGAR, avatar1);
+                printPersonagem(x_perso, y_perso, DESENHAR, avatar1);
                 if (verificarColisaoFases(obs, maxObj))
                 {   
                     printGameOver(DESENHAR);
@@ -1100,6 +1260,8 @@ int main()
                     
                     timerDestroy();
                     jogoIniciado = 0;
+                    faseAtual = 1;
+                    novaFase = 1;
 
                     for (int i = 0; i < maxObj; i++) {
                         printObj(obs[i], APAGAR);

@@ -4,7 +4,7 @@
  */
 
 #include <conio.h>
-#include "keyboard.h"
+#include "../include/keyboard.h"
 
 void keyboardInit() {
     // Não é necessário nada no Windows
