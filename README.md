@@ -1,6 +1,5 @@
-# 🎮 | Jogo X 
-Jogo de Aventura em Terminal  
-Desenvolvido para a disciplina de **Programação Imperativa e Funcional 2025.1** na **CESAR School**, sob orientação do docente **Diego de Freitas Bezerra**.
+# 🎮 | (A)void Game 
+Jogo de Aventura em Terminal, desenvolvido para a disciplina de **Programação Imperativa e Funcional 2025.1** na **CESAR School**, sob orientação do docente **Diego de Freitas Bezerra**.
 
 ---
 
@@ -117,11 +116,17 @@ Menu Inicial → Novo Jogo → Fases 1 a 4 (obstáculos) → Fase 5 (chefão) �
 
 1. Compile o código:
    ```bash
-   gcc game.c -o game
+   gcc ./src/*.c -I ./include/
 
 2. Execute o jogo:
 
-   ```/game
+   ```bash
+   gcc ./src/*.c -I ./include/ -o game
+
+3. Execute o jogo:
+
+   ```bash
+   ./game.exe
 
 > Certifique-se de que todas as bibliotecas customizadas estejam no mesmo diretório do projeto.
 
