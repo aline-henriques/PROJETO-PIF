@@ -1,6 +1,5 @@
-# 🎮 | Jogo X 
-Jogo de Aventura em Terminal  
-Desenvolvido para a disciplina de **Programação Imperativa e Funcional 2025.1** na **CESAR School**, sob orientação do docente **Diego de Freitas Bezerra**.
+# 🎮 | (A)void Game 
+Jogo de Aventura em Terminal, desenvolvido para a disciplina de **Programação Imperativa e Funcional 2025.1** na **CESAR School**, sob orientação do docente **Diego de Freitas Bezerra**.
 
 ---
 
