@@ -106,7 +106,7 @@ void printTirosBoss(Tiro tb, TipoAcao acao)
 
     const char* const* tiroBoss = (acao == DESENHAR) ? tiroBoss_desenhado : tiroBoss_apagado;
 
-    screenSetColor(MAGENTA, 0);
+    screenSetColor(MAGENTA, DARKGRAY);
 
     for (int i = 0; i < 7; i++)
     {
@@ -205,7 +205,7 @@ void printBossFinal(int x, int y, TipoAcao acao) {
     x_boss = x;
     y_boss = y;
 
-    screenSetColor(MAGENTA, 0);
+    screenSetColor(MAGENTA, DARKGRAY);
 
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < strlen(boss[i]); j++) {
@@ -256,7 +256,7 @@ void printGameOver(TipoAcao acao)
 void printObj(Obstaculos o, TipoAcao acao)
 {
     char simbolo = (acao == DESENHAR) ? 'X' : ' ';
-    screenSetColor(WHITE, WHITE);
+    screenSetColor(WHITE, DARKGRAY);
 
     for (int i = 0; i < o.tamanho; i++)
     {
@@ -635,14 +635,12 @@ void salvar_pontuacao(int nova_pontuacao) {
     fclose(arquivo);
 }
 
-void ler_pontuacoes() {
-    // Declaração de variáveis
+void ler_pontuacoes() 
+{
     char linha[256];
-    int y_pos = 8;  // Posição vertical inicial após cabeçalho
+    int y_pos = 8;
     int contador = 1;
     
-    // Configuração inicial da tela
-    screenClear();
     screenSetColor(CYAN, DARKGRAY);
     screenGotoxy(MAXX/2 - 15, 3);
     printf("📊 HISTÓRICO DE PONTUAÇÕES");
@@ -906,17 +904,21 @@ int main()
                             jogoIniciado = 1;
                             printPersonagem(MAXX*0.5, MAXY*0.5, DESENHAR, avatar1);
                             timerInit(30);
+                            screenInit(1);
                             break;
                         case 1:
                             screenClear();
+                            screenInit(1);
                             ler_pontuacoes();
                             printf("\nPressione qualquer tecla para voltar...");
                             while (!keyhit());
                             readch(); 
                             screenClear();
+                            screenInit(1);
                             break;
                         case 2:
                             screenClear();
+                            screenInit(1);
                             printConfig(DESENHAR, avatar1);
                             printf("\nPressione qualquer tecla para voltar...");
                             int total_personagens = sizeof(personagens) / sizeof(personagens[0]);
@@ -979,6 +981,7 @@ int main()
                             }
                             readch();
                             screenClear();
+                            screenInit(1);
                             break;
                         case 3:
                             keyboardDestroy();
