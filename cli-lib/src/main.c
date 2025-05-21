@@ -575,59 +575,54 @@ int comparar_pontuacoes(const void *a, const void *b) {
     return ((Pontuacao*)b)->pontos - ((Pontuacao*)a)->pontos;
 }
 
-void salvar_pontuacao(int nova_pontuacao) {
-    // Obter data/hora atual
+void salvar_pontuacao(int nova_pontuacao) 
+{
     time_t agora;
     time(&agora);
     char data_hora[20];
-    strftime(data_hora, 20, "%d/%m/%Y %H:%M", localtime(&agora));
+    strftime(data_hora, sizeof(data_hora), "%d/%m/%Y %H:%M", localtime(&agora));
 
-    // Carregar pontuações existentes
     Pontuacao records[MAX_RECORDS];
     int num_records = 0;
-    
-    FILE *arquivo = fopen("pontuacao.json", "r");
+
+    FILE *arquivo = fopen("pontuacao.txt", "r");
     if (arquivo != NULL) {
         char linha[256];
         while (fgets(linha, sizeof(linha), arquivo) && num_records < MAX_RECORDS) {
             if (sscanf(linha, "{\"data\": \"%19[^\"]\", \"pontos\": %d}", 
-                      records[num_records].data, &records[num_records].pontos) == 2) {
+                       records[num_records].data, &records[num_records].pontos) == 2) {
                 num_records++;
             }
         }
         fclose(arquivo);
     }
 
-    // Adicionar nova pontuação
     if (num_records < MAX_RECORDS) {
-        strcpy(records[num_records].data, data_hora);
+        strncpy(records[num_records].data, data_hora, sizeof(records[num_records].data) - 1);
+        records[num_records].data[sizeof(records[num_records].data) - 1] = '\0';
         records[num_records].pontos = nova_pontuacao;
         num_records++;
     } else {
-        // Se atingiu o limite, verifica se a nova pontuação é maior que a menor existente
         qsort(records, num_records, sizeof(Pontuacao), comparar_pontuacoes);
-        if (nova_pontuacao > records[MAX_RECORDS-1].pontos) {
-            strcpy(records[MAX_RECORDS-1].data, data_hora);
-            records[MAX_RECORDS-1].pontos = nova_pontuacao;
+
+        if (nova_pontuacao > records[MAX_RECORDS - 1].pontos) {
+            strncpy(records[MAX_RECORDS - 1].data, data_hora, sizeof(records[MAX_RECORDS - 1].data) - 1);
+            records[MAX_RECORDS - 1].data[sizeof(records[MAX_RECORDS - 1].data) - 1] = '\0';
+            records[MAX_RECORDS - 1].pontos = nova_pontuacao;
         } else {
-            // Se não for maior, não salva
             return;
         }
     }
 
-    // Ordenar do maior para o menor
     qsort(records, num_records, sizeof(Pontuacao), comparar_pontuacoes);
 
-    // Salvar de volta no arquivo
-    arquivo = fopen("pontuacao.json", "w");
+    arquivo = fopen("pontuacao.txt", "w");
     if (arquivo == NULL) {
         printf("Erro ao salvar pontuação!\n");
         return;
     }
 
-    // Limitar a 20 melhores pontuações
-    int limite = (num_records > 20) ? 20 : num_records;
-    for (int i = 0; i < limite; i++) {
+    for (int i = 0; i < num_records && i < MAX_RECORDS; i++) {
         fprintf(arquivo, "{\"data\": \"%s\", \"pontos\": %d}\n", 
                 records[i].data, records[i].pontos);
     }
@@ -640,69 +635,63 @@ void ler_pontuacoes()
     char linha[256];
     int y_pos = 8;
     int contador = 1;
-    
+
+    const int x_posicao = MAXX / 4;
+    const int x_data = x_posicao + 15;
+    const int x_pontos = MAXX / 2 + 15;
+
     screenSetColor(CYAN, DARKGRAY);
-    screenGotoxy(MAXX/2 - 15, 3);
+    screenGotoxy((MAXX / 2) - 15, 3);
     printf("📊 HISTÓRICO DE PONTUAÇÕES");
 
-    // Linha divisória
     screenSetColor(WHITE, DARKGRAY);
-    for (int x = MAXX/4; x < MAXX*3/4; x++) {
+    for (int x = x_posicao; x < MAXX * 3 / 4; x++) {
         screenGotoxy(x, 4);
         printf("-");
     }
 
-    // Cabeçalho da tabela
     screenSetColor(GREEN, DARKGRAY);
-    screenGotoxy(MAXX/4, 6);
+    screenGotoxy(x_posicao, 6);
     printf("POSIÇÃO");
-    screenGotoxy(MAXX/4 + 15, 6);
+    screenGotoxy(x_data, 6);
     printf("DATA");
-    screenGotoxy(MAXX/2 + 15, 6);
+    screenGotoxy(x_pontos, 6);
     printf("PONTOS");
 
-    // Abre o arquivo
-    FILE *arquivo = fopen("pontuacao.json", "r");
+    FILE *arquivo = fopen("pontuacao.txt", "r");
     if (arquivo == NULL) {
         screenSetColor(YELLOW, DARKGRAY);
-        screenGotoxy(MAXX/2 - 15, 8);
+        screenGotoxy((MAXX / 2) - 15, 8);
         printf("Nenhuma pontuação registrada ainda.");
-        // Espera por input antes de voltar
-        screenGotoxy(MAXX/2 - 15, MAXY - 2);
+
+        screenGotoxy(MAXX / 2 - 15, MAXY - 2);
         printf("Pressione qualquer tecla para voltar...");
         while (!keyhit());
         readch();
         return;
     }
 
-    while (fgets(linha, sizeof(linha), arquivo)) {
+    while (fgets(linha, sizeof(linha), arquivo) && contador <= MAX_RECORDS) {
         char data[20];
         int pontos;
-        
+
         if (sscanf(linha, "{\"data\": \"%19[^\"]\", \"pontos\": %d}", data, &pontos) == 2) {
             screenSetColor(WHITE, DARKGRAY);
-            
-            // Posição (ranking)
-            screenGotoxy(MAXX/4, y_pos);
+            screenGotoxy(x_posicao, y_pos);
             printf("%02d.", contador);
-            
-            // Data
-            screenGotoxy(MAXX/4 + 15, y_pos);
+
+            screenGotoxy(x_data, y_pos);
             printf("%s", data);
-            
-            // Pontuação
+
             screenSetColor(YELLOW, DARKGRAY);
-            screenGotoxy(MAXX/2 + 15, y_pos);
+            screenGotoxy(x_pontos, y_pos);
             printf("%d", pontos);
-            
+
             y_pos++;
             contador++;
-            
-            // Limita a exibir 20 registros por vez
-            if (contador > 20) break;
         }
     }
-    
+
     fclose(arquivo);
 }
 
@@ -714,9 +703,6 @@ void printConfig(TipoAcao acao, Avatar a1)
         "←   →",
         "     ",
         "  ↓  "
-  
-
-       
     };
 
     const char* config_apagado[] = {
@@ -742,8 +728,63 @@ void printConfig(TipoAcao acao, Avatar a1)
         } 
     }
 
-    printPersonagem(x_config + 1, y_config + 1, acao, a1);
+    printPersonagem(x_config + 1, y_config + 1, acao, a1);   
+}
+
+void printVitoriaBoss(TipoAcao acao) 
+{
+    const char* mensagem[] = {
+        "========================",
+        "     BOSS DERROTADO!    ",
+        "         🎉🎉🎉          ",
+        "========================"
+    };
     
+    screenSetColor(GREEN, DARKGRAY);
+    int y_pos = MAXY * 0.4;
+    
+    for (int i = 0; i < 5; i++) {
+        screenGotoxy(MAXX/2 - strlen(mensagem[i])/2, y_pos + i);
+        printf("%s", (acao == DESENHAR) ? mensagem[i] : "                        ");
+    }
+}
+
+void derrotarBoss(int* jogoIniciado, int* pontuacao, Obstaculos* obs, int maxObj, 
+                  Tiro* tiroPersonagem, Tiro* tiroBoss, int maxTiros, int maxTirosBoss) 
+{
+    printVitoriaBoss(DESENHAR);
+    screenUpdate();
+    
+    salvar_pontuacao(*pontuacao);
+    
+    Sleep(2000);
+    
+    printVitoriaBoss(APAGAR);
+    
+    *jogoIniciado = 0;
+    *pontuacao = 0;
+    
+    for (int i = 0; i < maxObj; i++) {
+        printObj(obs[i], APAGAR);
+        obs[i].tamanho = 0;
+    }
+    
+    for (int i = 0; i < maxTiros; i++) {
+        printTiros(tiroPersonagem[i], APAGAR);
+        tiroPersonagem[i].ativo = 0;
+    }
+    
+    for (int i = 0; i < maxTirosBoss; i++) {
+        printTirosBoss(tiroBoss[i], APAGAR);
+        tiroBoss[i].ativo = 0;
+    }
+    
+    x_perso = MAXX * 0.5;
+    y_perso = MAXY * 0.5;
+    x_boss = MAXX + 1;
+    
+    printMenuInicial(DESENHAR);
+    printSetaMenu(y_menuInicial, DESENHAR);
 }
 
 int main() 
@@ -787,6 +828,8 @@ int main()
     int bossVida = 10;
     Avatar avatar1 = {VERMELHO, personagens[0]};;
     int navePerso = 0;
+    int tempoInicioBoss = 0;
+    const int BONUS_DERROTA_BOSS = 1000;
 
 
     for (int i = 0; i < maxObj; i++)
@@ -873,6 +916,7 @@ int main()
                             tiroAtual = 0;
                             tiroBossAtual = 0;
                             contadorMovimentoBoss = 0;
+                            tempoInicioBoss = 0;
 
                             x_perso = MAXX * 0.5;
                             y_perso = MAXY * 0.5;
@@ -1180,6 +1224,7 @@ int main()
                     case 5:
                         printKey(ch);                        
                         if (!bossIniciado) {
+                            tempoInicioBoss = tempoinicial;
                             printMensagemBoss(DESENHAR);
                             screenUpdate();
                             
@@ -1230,15 +1275,21 @@ int main()
                             pontuacao+=100;
                             if (bossVida <= 0) 
                             {
-                                printGameOver(DESENHAR);
-                                salvar_pontuacao(pontuacao);
-                                printPontuacao(x_gameOver, y_gameOver + 1, DESENHAR);
-                                jogoIniciado = 0;
+                                int tempoContraBoss = tempoinicial - tempoInicioBoss;  // Sempre positivo
+                                int bonusTempo = (300 - tempoContraBoss) * 10;  // Bônus decrescente
+                                
+                                // Garante que o bônus não seja negativo
+                                bonusTempo = (bonusTempo > 0) ? bonusTempo : 0;
+                                
+                                pontuacao += BONUS_DERROTA_BOSS + bonusTempo;
+                                
+                                derrotarBoss(&jogoIniciado, &pontuacao, obs, maxObj, 
+                                            tiroPersonagem, tiroBoss, maxTiros, maxTirosBoss);
                             }
                         }
 
                         if (verificarColisaoTiroBossComPersonagem(tiroBoss, maxTirosBoss))
-                         {
+                        {
                             printGameOver(DESENHAR);
                             salvar_pontuacao(pontuacao);
                             printPontuacao(x_gameOver, y_gameOver + 1, DESENHAR);
