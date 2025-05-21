@@ -21,13 +21,11 @@ int x_pont = 0,y_pont = 0;
 int x_gameOver = MAXX * 0.60, y_gameOver = MAXY * 0.5;
 int x_config = (MAXX * 0.5)-2, y_config = (MAXY * 0.5)-2;
 
-
-typedef enum
-{
-    VERMELHO,
-    VERDE,
-    AZUL,
-    AMARELO,
+typedef enum {
+    VERMELHO = 4,
+    VERDE = 2, 
+    AZUL = 1, 
+    AMARELO = 6,
     COR_TOTAL
 } Cor;
 
@@ -492,7 +490,7 @@ void printMensagemBoss(TipoAcao acao)
     };
     
     screenSetColor(YELLOW, DARKGRAY);
-    int y_pos = MAXY * 0.4; // Posição vertical centralizada
+    int y_pos = MAXY * 0.4;
     
     for (int i = 0; i < 5; i++) {
         screenGotoxy(MAXX/2 - strlen(mensagem[i])/2, y_pos + i);
@@ -519,35 +517,31 @@ int verificarColisaoTiroBossComPersonagem(Tiro* tiros, int maxTiros)
                 "   <<<<" 
             };
             
-            // Verifica cada caractere '<' do tiro
             for (int linha = 0; linha < 7; linha++) 
             {
                 for (int coluna = 0; coluna < 7; coluna++) 
                 {
                     if (padraoTiro[linha][coluna] == '<') 
                     {
-                        // Posição absoluta do '<' na tela
                         int px = tx + coluna;
                         int py = ty + linha;
                         
-                        // Verifica colisão com o personagem (3x3)
                         if (px >= x_perso && px <= x_perso + 2 &&
                             py >= y_perso && py <= y_perso + 2) 
                         {
-                            return 1; // Colisão detectada
+                            return 1;
                         }
                     }
                 }
             }
         }
     }
-    return 0; // Sem colisão
+    return 0;
 }
 
 int verificarColisaoTiroComBoss(Tiro* tiros, int maxTiros) {
     for (int i = 0; i < maxTiros; i++) {
         if (tiros[i].ativo) {
-            // Verifica se o tiro está dentro da área do boss
             if (tiros[i].x_tiro >= x_boss && tiros[i].x_tiro <= x_boss + 10 &&
                 tiros[i].y_tiro >= y_boss && tiros[i].y_tiro <= y_boss + 6) {
                 tiros[i].ativo = 0;
@@ -571,7 +565,8 @@ void limparTiros(Tiro* tiros, int maxTiros)
     }
 }
 
-int comparar_pontuacoes(const void *a, const void *b) {
+int comparar_pontuacoes(const void *a, const void *b) 
+{
     return ((Pontuacao*)b)->pontos - ((Pontuacao*)a)->pontos;
 }
 
@@ -787,6 +782,12 @@ void derrotarBoss(int* jogoIniciado, int* pontuacao, Obstaculos* obs, int maxObj
     printSetaMenu(y_menuInicial, DESENHAR);
 }
 
+void inicializarPersonagem(Avatar *a1, Cor cor, int indiceForma) 
+{
+    a1->cor = cor;
+    a1->personagem = personagens[indiceForma];
+}
+
 int main() 
 {
     static int ch = 0;
@@ -826,10 +827,11 @@ int main()
     int bossIniciado = 0;
     int bossPronto = 0;
     int bossVida = 10;
-    Avatar avatar1 = {VERMELHO, personagens[0]};;
     int navePerso = 0;
     int tempoInicioBoss = 0;
     const int BONUS_DERROTA_BOSS = 1000;
+    Avatar avatar1;
+    inicializarPersonagem(&avatar1, VERMELHO, 3);
 
 
     for (int i = 0; i < maxObj; i++)
@@ -849,9 +851,8 @@ int main()
     screenHideCursor();
     screenUpdate();
 
-    while (ch != 27) //Esc
+    while (ch != 27)
     {
-        // Handle user input
         if (jogoIniciado == 0)
         {
             printMenuInicial(DESENHAR);
@@ -1103,16 +1104,10 @@ int main()
             }
         }
         
-        
-
-
-        // Update game state (move elements, verify collision, etc)
         if (timerTimeOver() == 1)
         {
             if (jogoIniciado == 1)
             {
-
-                // A cada ciclo, conta o tempo
                 contadorObstaculos++;
                 pontuacao++;
 
@@ -1122,8 +1117,6 @@ int main()
                     tempoinicial++;
                 }
                 
-
-                //Atualização de fase
                 if (obstaculoAtual >= 100)novaFase = 5;
                 else if (obstaculoAtual >= 60)novaFase = 4;
                 else if (obstaculoAtual >= 40)novaFase = 3;
@@ -1132,7 +1125,7 @@ int main()
                 if (novaFase != faseAtual) 
                 {
                     faseAtual = novaFase;
-                    //Atualização de inimigos
+
                     switch (faseAtual) 
                     {
                         case 1: tempoEntreObstaculos = 60; break;
@@ -1228,11 +1221,10 @@ int main()
                             printMensagemBoss(DESENHAR);
                             screenUpdate();
                             
-                            // Espera até que qualquer tecla seja pressionada
                             while (!keyhit()) {
-                                Sleep(100); // Pequena pausa para não consumir muitos recursos
+                                Sleep(100);
                             }
-                            readch(); // Limpa o buffer do teclado
+                            readch();
                             
                             printMensagemBoss(APAGAR);
                             bossIniciado = 1;
@@ -1275,10 +1267,9 @@ int main()
                             pontuacao+=100;
                             if (bossVida <= 0) 
                             {
-                                int tempoContraBoss = tempoinicial - tempoInicioBoss;  // Sempre positivo
-                                int bonusTempo = (300 - tempoContraBoss) * 10;  // Bônus decrescente
+                                int tempoContraBoss = tempoinicial - tempoInicioBoss;
+                                int bonusTempo = (300 - tempoContraBoss) * 10;
                                 
-                                // Garante que o bônus não seja negativo
                                 bonusTempo = (bonusTempo > 0) ? bonusTempo : 0;
                                 
                                 pontuacao += BONUS_DERROTA_BOSS + bonusTempo;
@@ -1327,16 +1318,12 @@ int main()
                     printSetaMenu(y_setaMenu, DESENHAR);
                 }
             }
-            
             screenHideCursor();
             screenUpdate();
         }
-
-
         screenHideCursor();
         screenUpdate();
     }
-
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
