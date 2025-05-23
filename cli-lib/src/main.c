@@ -955,7 +955,8 @@ int main()
                             screenClear();
                             screenInit(1);
                             ler_pontuacoes();
-                            printf("\nPressione qualquer tecla para voltar...");
+                            screenGotoxy((MAXX / 2) - 20, MAXY - 3);
+                            printf("Pressione qualquer tecla para voltar...");
                             while (!keyhit());
                             readch(); 
                             screenClear();
@@ -965,7 +966,8 @@ int main()
                             screenClear();
                             screenInit(1);
                             printConfig(DESENHAR, avatar1);
-                            printf("\nPressione qualquer tecla para voltar...");
+                            screenGotoxy((MAXX / 2) - 20, MAXY-3);
+                            printf("Pressione qualquer tecla para voltar...");
                             int total_personagens = sizeof(personagens) / sizeof(personagens[0]);
                             while (1) 
                             {
