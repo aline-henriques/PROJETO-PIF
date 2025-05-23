@@ -1270,7 +1270,7 @@ int main()
                             if (bossVida <= 0) 
                             {
                                 int tempoContraBoss = tempoinicial - tempoInicioBoss;
-                                int bonusTempo = (300 - tempoContraBoss) * 10;
+                                int bonusTempo = (3000 - tempoContraBoss) * 10;
                                 
                                 bonusTempo = (bonusTempo > 0) ? bonusTempo : 0;
                                 
